@@ -15,8 +15,7 @@ def date_converter(row):
 
 def extract_x_and_y(data: pd.DataFrame):
     dependent_variable = data.filter(["Стоимость тарифа"], axis=1)
-    data["Сезон"] = data.apply(lambda row: extract_season(row), axis=1)
-    arguments = data[["Глубина бронирования", "До заезда", "Сезон"]]
+    arguments = data[["Глубина бронирования", "До заезда", "Сезон","День","Количество бронирований"]]
     return arguments, dependent_variable
 
 
@@ -35,8 +34,9 @@ def extract_season(row):
 
 
 if not (path.isfile(TRAIN_DATA_PATH) and path.isfile(TEST_DATA_PATH)):
-    data = pd.read_csv("bookings_example.csv")
+    data = pd.read_csv("bookings_example.csv",encoding="utf-8")
     data["До заезда"] = data.apply(lambda row: date_converter(row), axis=1)
+    data["Сезон"] = data.apply(lambda row: extract_season(row), axis=1)
 
     data[data["Дата создания"] < "2018-01-01"].to_csv(TRAIN_DATA_PATH, index=False)
     data[data["Дата создания"] >= "2018-01-01"].to_csv(TEST_DATA_PATH, index=False)
