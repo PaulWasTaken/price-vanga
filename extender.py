@@ -1,6 +1,8 @@
 from datetime import date
+from math import log10
 
-DATA_PATH = "bookings_example.csv"
+ORIGINAL_DATA_PATH = "original_bookings_example.csv"
+EXTENDED_DATA_PATH = "bookings_example.csv"
 
 
 def extract_data(s):
@@ -19,18 +21,20 @@ def get_first_arrival(lines):
 
 
 def get_data_lines():
-    with open(DATA_PATH, "r", encoding="utf-8") as history:
-        lines = history.readlines()
+    with open(ORIGINAL_DATA_PATH, "r", encoding="utf-8") as history:
         is_first_line = True
-        for line in lines:
+        while 1:
+            line = history.readline()
+            if not line:
+                break
             if is_first_line:
                 is_first_line = False
                 continue
-            yield line[:-1].split(",")
+            yield line[:-1].strip().split(",")
 
 
 def save_data_lines(lines):
-    with open(DATA_PATH, "w", encoding="utf-8") as extended:
+    with open(EXTENDED_DATA_PATH, "w", encoding="utf-8") as extended:
         extended.write(
             "Стоимость тарифа,Дата создания,Глубина бронирования,Дата заезда,День,Количество бронирований\n")
         str_lines = list(map(lambda x: ",".join(map(lambda l: str(l), x)) + "\n", lines))
@@ -41,7 +45,7 @@ def extend_lines_with_days(lines):
     first_arrival = get_first_arrival(lines)
     for line in lines:
         current_arrival = extract_data(line[3])
-        days = (current_arrival - first_arrival).days + 1
+        days = round(log10((current_arrival - first_arrival).days + 1), 2)
         line.append(days)
 
 
@@ -53,11 +57,15 @@ def extend_lines_with_booking_count(lines):
             booking_history[arrival_date] += 1
         else:
             booking_history[arrival_date] = 1
-        line.append(booking_history[arrival_date])
+
+    for arrival_date in booking_history:
+        booking_history[arrival_date] = round(log10(booking_history[arrival_date]), 2)
+
+    for line in lines:
+        line.append(booking_history[line[3]])
 
 
-lines = list(get_data_lines())
-extend_lines_with_booking_count(lines)
-extend_lines_with_days(lines)
-save_data_lines(lines)
-pass
+def extend_data():
+    lines = list(get_data_lines())
+    extend_lines_with_booking_count(lines)
+    save_data_lines(lines)

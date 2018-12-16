@@ -2,6 +2,7 @@ import pandas as pd
 
 from datetime import datetime
 from os import path
+from sklearn.metrics import accuracy_score
 from xgboost import XGBRegressor
 
 
@@ -15,7 +16,7 @@ def date_converter(row):
 
 def extract_x_and_y(data: pd.DataFrame):
     dependent_variable = data.filter(["Стоимость тарифа"], axis=1)
-    arguments = data[["Глубина бронирования", "До заезда", "Сезон","День","Количество бронирований"]]
+    arguments = data[["Глубина бронирования", "До заезда", "Сезон"]]
     return arguments, dependent_variable
 
 
@@ -34,6 +35,9 @@ def extract_season(row):
 
 
 if not (path.isfile(TRAIN_DATA_PATH) and path.isfile(TEST_DATA_PATH)):
+    from extender import extend_data
+    extend_data()
+
     data = pd.read_csv("bookings_example.csv",encoding="utf-8")
     data["До заезда"] = data.apply(lambda row: date_converter(row), axis=1)
     data["Сезон"] = data.apply(lambda row: extract_season(row), axis=1)
@@ -49,15 +53,8 @@ x_test, y_test = extract_x_and_y(test_data)
 
 model = XGBRegressor()
 model.fit(x_train, y_train)
-print(model.score(x_test, y_test))
 
-
-# x_train = pd.read_csv("past_data.csv", encoding="cp1251")
-# y_train = pd.read_csv("past_value.csv", encoding="cp1251")
-
-
-# x_train["До заезда"] = x_train.apply(lambda row: date_converter(row), axis=1)
-# data["Сезон"] = data.apply(lambda row: extract_season(row), axis=1)
-
-# data = data[["Стоимость тарифа", "Глубина бронирования", "До заезда", "Сезон"]]
-# print(x_train.tail())
+y_pred = model.predict(x_test)
+predictions = [round(value) for value in y_pred]
+accuracy = accuracy_score(y_test, predictions)
+print(accuracy)
