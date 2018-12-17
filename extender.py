@@ -76,5 +76,3 @@ def extend_data():
     extend_lines_with_booking_count(lines)
     extend_lines_with_weekday(lines)
     save_data_lines(lines)
-
-extend_data()
