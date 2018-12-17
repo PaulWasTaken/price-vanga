@@ -36,7 +36,7 @@ def get_data_lines():
 def save_data_lines(lines):
     with open(EXTENDED_DATA_PATH, "w", encoding="utf-8") as extended:
         extended.write(
-            "Стоимость тарифа,Дата создания,Глубина бронирования,Дата заезда,День,Количество бронирований\n")
+            "Стоимость тарифа,Дата создания,Глубина бронирования,Дата заезда,День,Количество бронирований,Выходной\n")
         str_lines = list(map(lambda x: ",".join(map(lambda l: str(l), x)) + "\n", lines))
         extended.writelines(str_lines)
 
@@ -65,7 +65,18 @@ def extend_lines_with_booking_count(lines):
         line.append(booking_history[line[3]])
 
 
+def extend_lines_with_weekend(lines):
+    for line in lines:
+        arrival_date = extract_data(line[3])
+        is_weekend = arrival_date.weekday() == 5 or arrival_date.weekday() == 6
+        is_weekend = 1 if is_weekend else 0
+        line.append(is_weekend)
+
+
 def extend_data():
     lines = list(get_data_lines())
     extend_lines_with_booking_count(lines)
+    extend_lines_with_weekend(lines)
     save_data_lines(lines)
+
+extend_data()

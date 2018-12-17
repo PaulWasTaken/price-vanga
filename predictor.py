@@ -5,18 +5,18 @@ from os import path
 from sklearn.metrics import accuracy_score
 from xgboost import XGBRegressor
 
-
 TRAIN_DATA_PATH = "train_data.csv"
 TEST_DATA_PATH = "test_data.csv"
 
 
 def date_converter(row):
-    return (datetime.strptime(row["Дата заезда"], "%Y-%m-%d") - datetime.strptime(row["Дата создания"], "%Y-%m-%d")).days
+    return (datetime.strptime(row["Дата заезда"], "%Y-%m-%d") - datetime.strptime(row["Дата создания"],
+                                                                                  "%Y-%m-%d")).days
 
 
 def extract_x_and_y(data: pd.DataFrame):
     dependent_variable = data.filter(["Стоимость тарифа"], axis=1)
-    arguments = data[["Глубина бронирования", "До заезда", "Сезон"]]
+    arguments = data[["Глубина бронирования", "До заезда", "Сезон", "Выходной"]]
     return arguments, dependent_variable
 
 
@@ -36,9 +36,10 @@ def extract_season(row):
 
 if not (path.isfile(TRAIN_DATA_PATH) and path.isfile(TEST_DATA_PATH)):
     from extender import extend_data
+
     extend_data()
 
-    data = pd.read_csv("bookings_example.csv",encoding="utf-8")
+    data = pd.read_csv("bookings_example.csv", encoding="utf-8")
     data["До заезда"] = data.apply(lambda row: date_converter(row), axis=1)
     data["Сезон"] = data.apply(lambda row: extract_season(row), axis=1)
 
