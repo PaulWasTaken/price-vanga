@@ -16,7 +16,7 @@ def date_converter(row):
 
 def extract_x_and_y(data: pd.DataFrame):
     dependent_variable = data.filter(["Стоимость тарифа"], axis=1)
-    arguments = data[["Глубина бронирования", "До заезда", "Сезон", "Выходной"]]
+    arguments = data[["Глубина бронирования", "До заезда", "Сезон","День недели"]]
     return arguments, dependent_variable
 
 
